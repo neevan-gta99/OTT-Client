@@ -174,7 +174,7 @@ export const fetchTransactionsData = createAsyncThunk(
             return {
                 coinsTransactions: data.coinsTransactions || [],
                 videoTransactions: data.videoTransactions || [],
-                pagination: { 
+                pagination: {
                     coins: {
                         hasMore: data.pagination?.coins?.hasMore ?? true,
                         nextOffset: data.pagination?.coins?.nextOffset ?? offset + 1,
@@ -224,7 +224,16 @@ const userAuthSlice = createSlice({
             if (state.userData) {
                 state.userData.coins = action.payload;
             }
-        }
+        },
+        resetTransactions: (state) => {
+            state.coinsTransactions = [];
+            state.videoTransactions = [];
+            state.transactionsLoaded = false;
+            state.pagination = {
+                coins: { hasMore: true, nextOffset: 1, total: 0 },
+                videos: { hasMore: true, nextOffset: 1, total: 0 }
+            };
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -298,5 +307,5 @@ const userAuthSlice = createSlice({
     }
 });
 
-export const { logoutUser, setLoginSession, updateUserCoins } = userAuthSlice.actions;
+export const { logoutUser, setLoginSession, updateUserCoins, resetTransactions } = userAuthSlice.actions;
 export default userAuthSlice.reducer;

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { BASE_URL } from "./config/apiconfig.ts";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "./redux/store.ts";
-import { fetchUserData } from "./redux/features/userAuthSlice.ts";
+import { fetchTransactionsData, fetchUserData, resetTransactions } from "./redux/features/userAuthSlice.ts";
 import Navbar from "./Navbar.tsx";
 
 function VideoPage() {
@@ -27,7 +27,7 @@ function VideoPage() {
     useEffect(() => {
         const fetchAccess = async () => {
             if (!id) return;
-            
+
             try {
                 setLoading(true);
                 const res = await fetch(`${BASE_URL}/api/users/video-access/${id}`, {
@@ -62,7 +62,7 @@ function VideoPage() {
 
     const buyVideo = async () => {
         if (!id || !video) return;
-        
+
         const vid = videoMap[id];
         let Vid_Coins;
 
@@ -92,6 +92,11 @@ function VideoPage() {
                 alert(`Success! Now you have access of this video -> ${vid.title}`);
                 if (user_data?.userName) {
                     dispatch(fetchUserData(user_data.userName));
+                    dispatch(resetTransactions());
+                    dispatch(fetchTransactionsData({
+                        username: user_data.userName,
+                        offset: 0
+                    }));
                 }
                 setAllowed(data.allowed);
                 setVideo(videoMap[id!]);

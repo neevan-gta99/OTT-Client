@@ -869,3 +869,16 @@
   background: #fafafa;
   cursor: pointer;
 }
+
+.scroll-trigger {
+  height: 10px;
+  width: 100%;
+  visibility: hidden;
+}
+
+.loading-more {
+  text-align: center;
+  padding: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}

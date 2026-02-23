@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { BASE_URL } from "./config/apiconfig";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "./redux/store";
-import { fetchUserData } from "./redux/features/userAuthSlice";
+import { fetchTransactionsData, fetchUserData, resetTransactions } from "./redux/features/userAuthSlice";
 import { coinPlans } from "../utils/coinPackages.ts";
 import Navbar from "./Navbar.tsx";
 import { useNavigate } from "react-router-dom";
@@ -67,6 +67,11 @@ function BuyCoins() {
                 alert(`Success! ${coins} coins added to your account.`);
                 if (user_data?.userName) {
                   dispatch(fetchUserData(user_data.userName));
+                  dispatch(resetTransactions());
+                  dispatch(fetchTransactionsData({
+                    username: user_data.userName,
+                    offset: 0
+                  }));
                 }
                 navigate("/profile");
               } else {
@@ -129,11 +134,10 @@ function BuyCoins() {
                       <button
                         onClick={() => handlePayment(plan.rupees, plan.coins)}
                         disabled={loading === `${plan.rupees}`}
-                        className={`px-4 py-2 rounded text-white font-semibold transition ${
-                          loading === `${plan.rupees}`
+                        className={`px-4 py-2 rounded text-white font-semibold transition ${loading === `${plan.rupees}`
                             ? "bg-gray-400 cursor-not-allowed"
                             : "bg-blue-600 hover:bg-blue-700"
-                        }`}
+                          }`}
                       >
                         {loading === `${plan.rupees}` ? "Processing..." : "Buy Now"}
                       </button>
