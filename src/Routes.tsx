@@ -6,6 +6,7 @@ import Profile from "./Profile";
 import VideoPage from "./VideoPage";
 import BuyCoins from "./BuyCoins";
 import NotFound from "./NotFound";
+import Transactions from "./Transactions";
 
 const AppRoutes = () => {
     return (
@@ -17,7 +18,8 @@ const AppRoutes = () => {
             <Route path="/profile/:userName" element={<Profile />} />
             <Route path="/video/:id" element={<VideoPage />} />
             <Route path="/buy-coins" element={<BuyCoins />} />
-            <Route path="/404" element={<NotFound />} />
+            <Route path="/buy-coins" element={<BuyCoins />} />
+            <Route path="/transactions" element={<Transactions />} />
             <Route path="*" element={<NotFound />} />
         </Routes>
     )

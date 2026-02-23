@@ -10,7 +10,7 @@ type UserData = {
 };
 
 type NavbarProps = {
-  data: UserData | null; 
+  data: UserData | null;
 };
 
 const Navbar = ({ data }: NavbarProps) => {
@@ -25,10 +25,11 @@ const Navbar = ({ data }: NavbarProps) => {
   };
 
   const coins = data?.coins ?? 0;
-  
+
   const isVideoPage = location.pathname.startsWith("/video/");
   const isProfilePage = location.pathname === "/profile" || location.pathname.startsWith("/profile/");
   const isBuyCoinsPage = location.pathname === "/buy-coins";
+  const isTransactionsPage = location.pathname === "/transactions"; // ✅ Check for transactions page
 
   return (
     <nav className="navbar">
@@ -44,15 +45,52 @@ const Navbar = ({ data }: NavbarProps) => {
             <span className="brand-text">
               <NavLink to="/buy-coins">Buy Coins</NavLink>
             </span>
+            <span className="brand-text">
+              <NavLink
+                to="/transactions"
+                className="brand-text"
+              >
+                Transactions
+              </NavLink>
+            </span>
           </>
         ) : isBuyCoinsPage ? (
-          <span className="brand-text">
-            <NavLink to="/profile">Profile</NavLink>
-          </span>
+          <>
+            <span className="brand-text">
+              <NavLink to="/profile">Profile</NavLink>
+            </span>
+            <span className="brand-text">
+              <NavLink
+                to="/transactions"
+                className="brand-text"
+              >
+                Transactions
+              </NavLink>
+            </span>
+          </>
         ) : isProfilePage ? (
-          <span className="brand-text">
-            <NavLink to="/buy-coins">Buy Coins</NavLink>
-          </span>
+          <>
+            <span className="brand-text">
+              <NavLink to="/buy-coins">Buy Coins</NavLink>
+            </span>
+            <span className="brand-text">
+              <NavLink
+                to="/transactions"
+                className="brand-text"
+              >
+                Transactions
+              </NavLink>
+            </span>
+          </>
+        ) : isTransactionsPage ? (
+          <>
+            <span className="brand-text">
+              <NavLink to="/profile">Profile</NavLink>
+            </span>
+            <span className="brand-text">
+              <NavLink to="/buy-coins">Buy Coins</NavLink>
+            </span>
+          </>
         ) : null}
 
       </div>

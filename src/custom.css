@@ -590,3 +590,282 @@
     align-items: center;
     text-align: center;
 }
+
+/* Transactions page Css */
+
+/* Transactions.css */
+
+.transactions-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.transactions-title {
+  font-size: 2rem;
+  text-align: center;
+  color: #333;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.transactions-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea, #ff6b6b);
+  border-radius: 2px;
+}
+
+.transactions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+/* Section Styles */
+.transaction-section {
+  background: #f8f9fa;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  padding: 1.2rem 1.5rem;
+  color: white;
+}
+
+.section-header.coin-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.section-header.video-header {
+  background: linear-gradient(135deg, #ff6b6b 0%, #c44569 100%);
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-content {
+  padding: 1.5rem;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* Date Group */
+.date-group {
+  margin-bottom: 1.5rem;
+}
+
+.date-heading {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.8rem;
+  padding-left: 0.8rem;
+  border-left: 3px solid;
+  font-weight: 500;
+}
+
+.coint .date-heading {
+  border-left-color: #667eea;
+}
+
+.video .date-heading {
+  border-left-color: #ff6b6b;
+}
+
+/* Transaction Card */
+.transaction-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  border: 1px solid #eee;
+}
+
+.transaction-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #ddd;
+}
+
+.transaction-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.transaction-info {
+  flex: 1;
+}
+
+.transaction-title {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.transaction-details {
+  font-size: 0.85rem;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.transaction-details span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.transaction-amount {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-right: 1rem;
+}
+
+.credit .transaction-amount {
+  color: #4caf50;
+}
+
+.debit .transaction-amount {
+  color: #ff6b6b;
+}
+
+/* Status Badge */
+.status-badge {
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 70px;
+  text-align: center;
+}
+
+.status-badge.success {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-badge.failed {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #999;
+  background: white;
+  border-radius: 10px;
+  border: 2px dashed #ddd;
+}
+
+.empty-state p {
+  margin: 0.5rem 0;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* Scrollbar Styling */
+.section-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.section-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.section-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.section-content::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .transactions-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .transactions-container {
+    padding: 0 1rem;
+  }
+  
+  .section-content {
+    max-height: 400px;
+  }
+  
+  .transaction-card {
+    padding: 0.8rem;
+  }
+  
+  .transaction-title {
+    font-size: 0.9rem;
+  }
+  
+  .transaction-amount {
+    font-size: 1rem;
+  }
+}
+
+
+.transaction-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.transaction-amount.debit {
+  color: #ff6b6b;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Status badge for video section failed */
+.status-badge.failed {
+  background: #ffebee;
+  color: #c62828;
+  padding: 0.2rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+}
+
+/* Better spacing */
+.transaction-card {
+  margin-bottom: 10px;
+}
+
+.date-group {
+  margin-bottom: 20px;
+}
+
+/* Hover effect */
+.transaction-card:hover {
+  background: #fafafa;
+  cursor: pointer;
+}
