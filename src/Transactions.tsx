@@ -7,7 +7,6 @@ import { BASE_URL } from './config/apiconfig';
 import { useNavigate } from 'react-router-dom';
 
 const Transactions = () => {
-  const dispatch = useDispatch<AppDispatch>();
   const [updateKey, setUpdateKey] = useState(0);
 
   // Refs for intersection observers
@@ -30,20 +29,18 @@ const Transactions = () => {
   const [hasMoreCoins, setHasMoreCoins] = useState(true);
   const [hasMoreVideos, setHasMoreVideos] = useState(true);
 
-  // Local state for appended data
   const [localCoinsTransactions, setLocalCoinsTransactions] = useState<any[]>([]);
   const [localVideoTransactions, setLocalVideoTransactions] = useState<any[]>([]);
 
-
   const navigate = useNavigate();
   const loginTimestamp = useSelector((state: RootState) => state.userAuth.loginTimestamp);
-
 
   useEffect(() => {
     if (loginTimestamp == null) {
       navigate("/login");
     }
   }, [loginTimestamp, navigate]);
+
   const {
     coinsTransactions,
     videoTransactions,
@@ -52,7 +49,7 @@ const Transactions = () => {
     transactionsLoaded
   } = useSelector((state: RootState) => state.userAuth);
 
-  // Initialize local state with Redux data
+  // ✅ Initialize local state with Redux data
   useEffect(() => {
     if (coinsTransactions.length > 0) {
       setLocalCoinsTransactions(coinsTransactions);
@@ -64,16 +61,18 @@ const Transactions = () => {
     }
   }, [coinsTransactions, videoTransactions]);
 
-  // Fetch initial transactions if not loaded
+  // ✅ FIX: Check if data exists and update hasMore accordingly
   useEffect(() => {
-    if (userData?.userName && !transactionsLoaded && !loading) {
-      console.log("📥 Fetching initial transactions...");
-      dispatch(fetchTransactionsData({
-        username: userData.userName,
-        offset: 0
-      }));
+    // Agar transactions loaded hain but local transactions empty hain
+    if (transactionsLoaded) {
+      if (localCoinsTransactions.length === 0) {
+        setHasMoreCoins(false);
+      }
+      if (localVideoTransactions.length === 0) {
+        setHasMoreVideos(false);
+      }
     }
-  }, [userData?.userName, transactionsLoaded, loading, dispatch]);
+  }, [transactionsLoaded, localCoinsTransactions.length, localVideoTransactions.length]);
 
   // Debug state changes
   useEffect(() => {
@@ -113,14 +112,17 @@ const Transactions = () => {
       if (res.ok) {
         const data = await res.json();
 
-        // Append new coins transactions
-        setLocalCoinsTransactions(prev => [...prev, ...data.coinsTransactions]);
-
-        // Update pagination
-        setHasMoreCoins(data.pagination.hasMore);
-        setCoinsOffset(prev => prev + 1);
-
-        console.log(`✅ Loaded ${data.coinsTransactions.length} more coins. Has more: ${data.pagination.hasMore}`);
+        // Agar response me transactions hain to append karo
+        if (data.coinsTransactions && data.coinsTransactions.length > 0) {
+          setLocalCoinsTransactions(prev => [...prev, ...data.coinsTransactions]);
+          setHasMoreCoins(data.pagination.hasMore);
+          setCoinsOffset(prev => prev + 1);
+          console.log(`✅ Loaded ${data.coinsTransactions.length} more coins. Has more: ${data.pagination.hasMore}`);
+        } else {
+          // Agar transactions nahi hain to hasMore false kar do
+          setHasMoreCoins(false);
+          console.log("✅ No more coins to load");
+        }
       }
     } catch (err) {
       console.error("Error loading more coins:", err);
@@ -155,14 +157,17 @@ const Transactions = () => {
       if (res.ok) {
         const data = await res.json();
 
-        // Append new video transactions
-        setLocalVideoTransactions(prev => [...prev, ...data.videoTransactions]);
-
-        // Update pagination
-        setHasMoreVideos(data.pagination.hasMore);
-        setVideosOffset(prev => prev + 1);
-
-        console.log(`✅ Loaded ${data.videoTransactions.length} more videos. Has more: ${data.pagination.hasMore}`);
+        // Agar response me transactions hain to append karo
+        if (data.videoTransactions && data.videoTransactions.length > 0) {
+          setLocalVideoTransactions(prev => [...prev, ...data.videoTransactions]);
+          setHasMoreVideos(data.pagination.hasMore);
+          setVideosOffset(prev => prev + 1);
+          console.log(`✅ Loaded ${data.videoTransactions.length} more videos. Has more: ${data.pagination.hasMore}`);
+        } else {
+          // Agar transactions nahi hain to hasMore false kar do
+          setHasMoreVideos(false);
+          console.log("✅ No more videos to load");
+        }
       }
     } catch (err) {
       console.error("Error loading more videos:", err);
@@ -172,8 +177,17 @@ const Transactions = () => {
     }
   }, [userData?.userName, hasMoreVideos, videosOffset]);
 
-  // ✅ Setup Intersection Observer for Coins - ONLY ONCE
+  // ✅ FIX: Setup Intersection Observer for Coins - with proper conditions
   useEffect(() => {
+    // Agar data nahi hai to observer mat banao
+    if (!hasMoreCoins || loadingCoins || localCoinsTransactions.length === 0) {
+      if (coinsObserverRef.current) {
+        coinsObserverRef.current.disconnect();
+        coinsObserverRef.current = null;
+      }
+      return;
+    }
+
     // Cleanup previous observer
     if (coinsObserverRef.current) {
       coinsObserverRef.current.disconnect();
@@ -190,7 +204,7 @@ const Transactions = () => {
       },
       {
         threshold: 0.1,
-        rootMargin: '200px'  // Increased margin
+        rootMargin: '200px'
       }
     );
 
@@ -204,11 +218,19 @@ const Transactions = () => {
         coinsObserverRef.current.disconnect();
       }
     };
-    // ✅ REMOVED coinsTriggerRef.current from dependencies
-  }, [hasMoreCoins, loadingCoins, loadMoreCoins]);
+  }, [hasMoreCoins, loadingCoins, loadMoreCoins, localCoinsTransactions.length]);
 
-  // ✅ Setup Intersection Observer for Videos - ONLY ONCE
+  // ✅ FIX: Setup Intersection Observer for Videos - with proper conditions
   useEffect(() => {
+    // Agar data nahi hai to observer mat banao
+    if (!hasMoreVideos || loadingVideos || localVideoTransactions.length === 0) {
+      if (videosObserverRef.current) {
+        videosObserverRef.current.disconnect();
+        videosObserverRef.current = null;
+      }
+      return;
+    }
+
     // Cleanup previous observer
     if (videosObserverRef.current) {
       videosObserverRef.current.disconnect();
@@ -239,8 +261,7 @@ const Transactions = () => {
         videosObserverRef.current.disconnect();
       }
     };
-    // ✅ REMOVED videosTriggerRef.current from dependencies
-  }, [hasMoreVideos, loadingVideos, loadMoreVideos]);
+  }, [hasMoreVideos, loadingVideos, loadMoreVideos, localVideoTransactions.length]);
 
   // Group transactions by date
   const groupByDate = (transactions: any[]) => {
@@ -303,6 +324,7 @@ const Transactions = () => {
             <div className="section-header coin-header">
               <h2>🪙 Coins Purchased ({localCoinsTransactions.length})</h2>
             </div>
+
             <div className="section-content">
               {sortedCoinDates.map((date) => (
                 <div key={date} className="date-group">
@@ -329,19 +351,22 @@ const Transactions = () => {
                 </div>
               ))}
 
-              {localCoinsTransactions.length === 0 && (
+              {/* ✅ FIX: Empty state for coins */}
+              {localCoinsTransactions.length === 0 && !loadingCoins && (
                 <div className="empty-state">
                   <div className="empty-icon">🪙</div>
                   <p>No coin purchases yet</p>
                 </div>
               )}
 
-              {/* Scroll Trigger for Coins - always present but observed conditionally */}
-              <div
-                ref={coinsTriggerRef}
-                className="scroll-trigger"
-                style={{ height: '20px', width: '100%' }}
-              />
+              {/* ✅ FIX: Scroll Trigger for Coins - only if hasMore AND data exists */}
+              {hasMoreCoins && localCoinsTransactions.length > 0 && (
+                <div
+                  ref={coinsTriggerRef}
+                  className="scroll-trigger"
+                  style={{ height: '20px', width: '100%' }}
+                />
+              )}
 
               {/* Loading indicator for coins */}
               {loadingCoins && (
@@ -386,19 +411,22 @@ const Transactions = () => {
                 </div>
               ))}
 
-              {localVideoTransactions.length === 0 && (
+              {/* ✅ FIX: Empty state for videos */}
+              {localVideoTransactions.length === 0 && !loadingVideos && (
                 <div className="empty-state">
                   <div className="empty-icon">🎬</div>
                   <p>No video purchases yet</p>
                 </div>
               )}
 
-              {/* Scroll Trigger for Videos - always present but observed conditionally */}
-              <div
-                ref={videosTriggerRef}
-                className="scroll-trigger"
-                style={{ height: '20px', width: '100%' }}
-              />
+              {/* ✅ FIX: Scroll Trigger for Videos - only if hasMore AND data exists */}
+              {hasMoreVideos && localVideoTransactions.length > 0 && (
+                <div
+                  ref={videosTriggerRef}
+                  className="scroll-trigger"
+                  style={{ height: '20px', width: '100%' }}
+                />
+              )}
 
               {/* Loading indicator for videos */}
               {loadingVideos && (

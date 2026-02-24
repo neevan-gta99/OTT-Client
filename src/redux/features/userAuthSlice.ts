@@ -138,18 +138,6 @@ export const fetchTransactionsData = createAsyncThunk(
                 return rejectWithValue('Username is required');
             }
 
-            const state = getState() as RootState;
-            const currentTransactions = state.userAuth.coinsTransactions;
-
-            if (offset === 0 && currentTransactions.length > 0) {
-                return {
-                    coinsTransactions: currentTransactions,
-                    videoTransactions: state.userAuth.videoTransactions,
-                    pagination: state.userAuth.pagination,
-                    fromCache: true
-                };
-            }
-
             const res = await fetch(`${BASE_URL}/api/users/transactions-data`, {
                 method: "POST",
                 credentials: "include",
@@ -185,8 +173,7 @@ export const fetchTransactionsData = createAsyncThunk(
                         nextOffset: data.pagination?.videos?.nextOffset ?? offset + 1,
                         total: data.pagination?.videos?.totalOverall ?? 0
                     }
-                },
-                fromCache: false
+                }
             };
 
         } catch (err) {
@@ -270,32 +257,26 @@ const userAuthSlice = createSlice({
             .addCase(fetchTransactionsData.fulfilled, (state, action) => {
                 state.loading = false;
 
-                if (action.payload.fromCache) {
-                    return;
-                }
+                state.coinsTransactions = action.payload.coinsTransactions;
+                state.videoTransactions = action.payload.videoTransactions;
+                state.transactionsLoaded = true;
 
-                if (action.meta.arg.offset === 0) {
-                    state.coinsTransactions = action.payload.coinsTransactions;
-                    state.videoTransactions = action.payload.videoTransactions;
-                    state.transactionsLoaded = true;
+                if (action.payload.pagination) {
+                    state.pagination = {
+                        coins: {
+                            hasMore: action.payload.pagination.coins.hasMore,
+                            nextOffset: action.payload.pagination.coins.nextOffset,
+                            total: action.payload.pagination.coins.total
+                        },
+                        videos: {
+                            hasMore: action.payload.pagination.videos.hasMore,
+                            nextOffset: action.payload.pagination.videos.nextOffset,
+                            total: action.payload.pagination.videos.total
+                        }
+                    };
 
-                    if (action.payload.pagination) {
-                        state.pagination = {
-                            coins: {
-                                hasMore: action.payload.pagination.coins.hasMore,
-                                nextOffset: action.payload.pagination.coins.nextOffset,
-                                total: action.payload.pagination.coins.total
-                            },
-                            videos: {
-                                hasMore: action.payload.pagination.videos.hasMore,
-                                nextOffset: action.payload.pagination.videos.nextOffset,
-                                total: action.payload.pagination.videos.total
-                            }
-                        };
-
-                        state.hasMoreTransactions = action.payload.pagination.coins.hasMore;
-                        state.currentOffset = action.payload.pagination.coins.nextOffset || 0;
-                    }
+                    state.hasMoreTransactions = action.payload.pagination.coins.hasMore;
+                    state.currentOffset = action.payload.pagination.coins.nextOffset || 0;
                 }
 
                 state.error = null;
