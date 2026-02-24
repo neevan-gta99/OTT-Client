@@ -4,35 +4,46 @@ import type { AppDispatch, RootState } from './redux/store';
 import Navbar from './Navbar';
 import { fetchTransactionsData } from './redux/features/userAuthSlice';
 import { BASE_URL } from './config/apiconfig';
+import { useNavigate } from 'react-router-dom';
 
 const Transactions = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [updateKey, setUpdateKey] = useState(0);
-  
+
   // Refs for intersection observers
   const coinsObserverRef = useRef<IntersectionObserver | null>(null);
   const videosObserverRef = useRef<IntersectionObserver | null>(null);
   const coinsTriggerRef = useRef<HTMLDivElement | null>(null);
   const videosTriggerRef = useRef<HTMLDivElement | null>(null);
-  
+
   // Flag to prevent multiple triggers
   const isCoinsLoadingRef = useRef(false);
   const isVideosLoadingRef = useRef(false);
-  
+
   // Separate loading states for each section
   const [loadingCoins, setLoadingCoins] = useState(false);
   const [loadingVideos, setLoadingVideos] = useState(false);
-  
+
   // Pagination states
   const [coinsOffset, setCoinsOffset] = useState(1);
   const [videosOffset, setVideosOffset] = useState(1);
   const [hasMoreCoins, setHasMoreCoins] = useState(true);
   const [hasMoreVideos, setHasMoreVideos] = useState(true);
-  
+
   // Local state for appended data
   const [localCoinsTransactions, setLocalCoinsTransactions] = useState<any[]>([]);
   const [localVideoTransactions, setLocalVideoTransactions] = useState<any[]>([]);
 
+
+  const navigate = useNavigate();
+  const loginTimestamp = useSelector((state: RootState) => state.userAuth.loginTimestamp);
+
+
+  useEffect(() => {
+    if (loginTimestamp == null) {
+      navigate("/login");
+    }
+  }, [loginTimestamp, navigate]);
   const {
     coinsTransactions,
     videoTransactions,
@@ -57,9 +68,9 @@ const Transactions = () => {
   useEffect(() => {
     if (userData?.userName && !transactionsLoaded && !loading) {
       console.log("📥 Fetching initial transactions...");
-      dispatch(fetchTransactionsData({ 
-        username: userData.userName, 
-        offset: 0 
+      dispatch(fetchTransactionsData({
+        username: userData.userName,
+        offset: 0
       }));
     }
   }, [userData?.userName, transactionsLoaded, loading, dispatch]);
@@ -80,11 +91,11 @@ const Transactions = () => {
   // ✅ Load More Coins - Separate API (memoized with useCallback)
   const loadMoreCoins = useCallback(async () => {
     if (!userData?.userName || !hasMoreCoins || loadingCoins || isCoinsLoadingRef.current) return;
-    
+
     console.log(`💰 Loading more coins with offset: ${coinsOffset}`);
     setLoadingCoins(true);
     isCoinsLoadingRef.current = true;
-    
+
     try {
       const res = await fetch(`${BASE_URL}/api/users/get-more-coins`, {
         method: "POST",
@@ -101,14 +112,14 @@ const Transactions = () => {
 
       if (res.ok) {
         const data = await res.json();
-        
+
         // Append new coins transactions
         setLocalCoinsTransactions(prev => [...prev, ...data.coinsTransactions]);
-        
+
         // Update pagination
         setHasMoreCoins(data.pagination.hasMore);
         setCoinsOffset(prev => prev + 1);
-        
+
         console.log(`✅ Loaded ${data.coinsTransactions.length} more coins. Has more: ${data.pagination.hasMore}`);
       }
     } catch (err) {
@@ -122,11 +133,11 @@ const Transactions = () => {
   // ✅ Load More Videos - Separate API (memoized with useCallback)
   const loadMoreVideos = useCallback(async () => {
     if (!userData?.userName || !hasMoreVideos || loadingVideos || isVideosLoadingRef.current) return;
-    
+
     console.log(`🎬 Loading more videos with offset: ${videosOffset}`);
     setLoadingVideos(true);
     isVideosLoadingRef.current = true;
-    
+
     try {
       const res = await fetch(`${BASE_URL}/api/users/get-more-videos`, {
         method: "POST",
@@ -143,14 +154,14 @@ const Transactions = () => {
 
       if (res.ok) {
         const data = await res.json();
-        
+
         // Append new video transactions
         setLocalVideoTransactions(prev => [...prev, ...data.videoTransactions]);
-        
+
         // Update pagination
         setHasMoreVideos(data.pagination.hasMore);
         setVideosOffset(prev => prev + 1);
-        
+
         console.log(`✅ Loaded ${data.videoTransactions.length} more videos. Has more: ${data.pagination.hasMore}`);
       }
     } catch (err) {
@@ -177,7 +188,7 @@ const Transactions = () => {
           loadMoreCoins();
         }
       },
-      { 
+      {
         threshold: 0.1,
         rootMargin: '200px'  // Increased margin
       }
@@ -193,7 +204,7 @@ const Transactions = () => {
         coinsObserverRef.current.disconnect();
       }
     };
-  // ✅ REMOVED coinsTriggerRef.current from dependencies
+    // ✅ REMOVED coinsTriggerRef.current from dependencies
   }, [hasMoreCoins, loadingCoins, loadMoreCoins]);
 
   // ✅ Setup Intersection Observer for Videos - ONLY ONCE
@@ -212,7 +223,7 @@ const Transactions = () => {
           loadMoreVideos();
         }
       },
-      { 
+      {
         threshold: 0.1,
         rootMargin: '200px'
       }
@@ -228,7 +239,7 @@ const Transactions = () => {
         videosObserverRef.current.disconnect();
       }
     };
-  // ✅ REMOVED videosTriggerRef.current from dependencies
+    // ✅ REMOVED videosTriggerRef.current from dependencies
   }, [hasMoreVideos, loadingVideos, loadMoreVideos]);
 
   // Group transactions by date
@@ -286,7 +297,7 @@ const Transactions = () => {
         <h1 className="transactions-title">Transaction History</h1>
 
         <div className="transactions-grid">
-          
+
           {/* Left Section - Coins Purchased */}
           <div className="transaction-section">
             <div className="section-header coin-header">
@@ -317,7 +328,7 @@ const Transactions = () => {
                   ))}
                 </div>
               ))}
-              
+
               {localCoinsTransactions.length === 0 && (
                 <div className="empty-state">
                   <div className="empty-icon">🪙</div>
@@ -326,7 +337,7 @@ const Transactions = () => {
               )}
 
               {/* Scroll Trigger for Coins - always present but observed conditionally */}
-              <div 
+              <div
                 ref={coinsTriggerRef}
                 className="scroll-trigger"
                 style={{ height: '20px', width: '100%' }}
@@ -374,7 +385,7 @@ const Transactions = () => {
                   ))}
                 </div>
               ))}
-              
+
               {localVideoTransactions.length === 0 && (
                 <div className="empty-state">
                   <div className="empty-icon">🎬</div>
@@ -383,7 +394,7 @@ const Transactions = () => {
               )}
 
               {/* Scroll Trigger for Videos - always present but observed conditionally */}
-              <div 
+              <div
                 ref={videosTriggerRef}
                 className="scroll-trigger"
                 style={{ height: '20px', width: '100%' }}
